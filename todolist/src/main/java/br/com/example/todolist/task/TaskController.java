@@ -1,11 +1,16 @@
 package br.com.example.todolist.task;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/tasks")
@@ -15,8 +20,22 @@ public class TaskController {
 
   @SuppressWarnings("rawtypes")
   @PostMapping("/create")
-  public ResponseEntity create(@RequestBody TaskModel taskModel) {
-    var taskCreate = this.taskRepositoy.save(taskModel);
-    return ResponseEntity.status(201).body(taskCreate);
+  public ResponseEntity create(@RequestBody TaskModel taskModel, HttpServletRequest request) {
+    var idUser = request.getAttribute("idUser");
+    taskModel.setIdUser((UUID) idUser);
+    LocalDateTime currentDate = LocalDateTime.now();
+
+    if (currentDate.isAfter(taskModel.getStartAt()) || currentDate.isAfter(taskModel.getEndAt())) {
+      return ResponseEntity.status(401)
+          .body("Tanto a data de início quanto a data de término devem ser maiores que a data atual.");
+    }
+
+    if (taskModel.getStartAt().isAfter(taskModel.getEndAt())) {
+      return ResponseEntity.status(401)
+          .body("A data de início não pode ser posterior a data de término.");
+    }
+
+    var taskCreated = this.taskRepositoy.save(taskModel);
+    return ResponseEntity.status(201).body(taskCreated);
   }
 }

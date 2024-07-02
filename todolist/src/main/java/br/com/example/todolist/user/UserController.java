@@ -19,7 +19,6 @@ public class UserController {
   @SuppressWarnings("rawtypes")
   @PostMapping("/create")
   public ResponseEntity create(@RequestBody UserModel userModel) {
-
     var user = this.userRepository.findByUserName(userModel.getUserName());
     if (user != null) {
       return ResponseEntity.status(400).body("User already exists!");
