@@ -56,7 +56,6 @@ public class FilterTaskAuth extends OncePerRequestFilter {
 
     } else {
       filterChain.doFilter(request, response);
-      System.out.println("Não passou pelo filtro de task");
     }
 
   }
